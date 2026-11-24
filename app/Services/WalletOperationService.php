@@ -101,18 +101,13 @@ class WalletOperationService
     public function reverse(User $actor, int $operationId, string $reason, string $key): array
     {
         return DB::transaction(function () use ($actor, $operationId, $reason, $key): array {
-            $replay = WalletOperation::query()
-                ->where('created_by_user_id', $actor->getKey())
-                ->where('idempotency_key', $key)
-                ->lockForUpdate()
-                ->first();
-
+            $expected = [
+                'reverses_operation_id' => $operationId,
+                'description' => $reason,
+            ];
+            $replay = $this->replay($actor, $key, $expected);
             if ($replay) {
-                if ((int) $replay->reverses_operation_id !== $operationId || $replay->description !== $reason) {
-                    throw new WalletOperationConflictException('A chave de envio já foi usada com outra operação.');
-                }
-
-                return ['operation' => $replay, 'created' => false];
+                return $replay;
             }
 
             $original = WalletOperation::query()->findOrFail($operationId);
@@ -130,6 +125,11 @@ class WalletOperationService
 
             // As contas são travadas em ordem de ID para evitar deadlocks entre transferências cruzadas.
             $this->lockUsers($participants);
+            $replay = $this->replay($actor, $key, $expected);
+            if ($replay) {
+                return $replay;
+            }
+
             $original = WalletOperation::query()
                 ->with('ledgerEntries')
                 ->lockForUpdate()
@@ -204,7 +204,7 @@ class WalletOperationService
         foreach ($expected as $field => $value) {
             $stored = $operation->{$field};
             if ($value === null ? $stored !== null : (string) $stored !== (string) $value) {
-                throw new WalletOperationConflictException('A chave de envio já foi usada com outra operação.');
+                throw new WalletOperationConflictException('Esta chave já foi usada com outros dados.');
             }
         }
 
