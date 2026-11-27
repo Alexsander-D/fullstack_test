@@ -35,7 +35,7 @@ class WalletOperationTest extends TestCase
         $operation = WalletOperation::create([
             'created_by_user_id' => $user->id,
             'from_user_id' => $user->id,
-            'type' => 'legacy_expense',
+            'type' => 'expense',
             'amount_cents' => 5000,
             'description' => 'Saldo devedor anterior',
             'occurred_on' => '2026-11-20',

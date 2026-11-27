@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
     'description',
     'occurred_on',
     'reverses_operation_id',
-    'legacy_entry_id',
     'idempotency_key',
 ])]
 class WalletOperation extends Model

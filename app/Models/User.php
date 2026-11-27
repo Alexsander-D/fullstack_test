@@ -19,10 +19,6 @@ class User extends Authenticatable implements JWTSubject
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
-    public function walletEntries(): HasMany
-    {
-        return $this->hasMany(WalletEntry::class);
-    }
 
     public function ledgerEntries(): HasMany
     {
@@ -35,7 +31,7 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * O token identifica o usuário sem copiar dados pessoais para as claims.
+     * O token identifica o usuÃ¡rio sem copiar dados pessoais para as claims.
      *
      * @return array<string, mixed>
      */
